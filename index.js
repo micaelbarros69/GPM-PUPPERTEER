@@ -1,9 +1,22 @@
-
+const ExcelJS = require('exceljs');
 const puppeteer = require('puppeteer');
 const readlineSync = require('readline-sync');
 
 
 console.log('Bem vindo Micael Barros');
+
+
+
+async function obterLinkDoExcel() {
+  // Criar uma nova instância do Workbook do ExcelJS
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile('Base/BASE.xlsx'); // Ajuste o caminho do arquivo
+  const worksheet = workbook.getWorksheet(1); // Acessa a primeira planilha
+
+  // Obter o valor da célula específica, supondo que o link esteja na célula A2
+  const link = worksheet.getCell('A2').value;
+  return link;
+}
 
 
 
@@ -21,7 +34,7 @@ async function robo() {
   const page = await browser.newPage();
   const qualquerUrl = `https://beqce.gpm.srv.br/index.php`;
   const qualquerUrl2 = `https://beqce.gpm.srv.br/cadastro/geral/obras.php?action=alter&popup=1&cod=64675&cont=34&cellStyle=true&link=1`;
-  const qualquerUrl3 = 'https://beqce.gpm.srv.br/cadastro/geral/obras.php?action=alter&cod=64675&cont=34&cellStyle=true&link=9';
+  const qualquerUrl3 = `https://beqce.gpm.srv.br/cadastro/geral/obras.php?action=alter&popup=1&cod=64675&cont=34&cellStyle=true&link=1`;
   
   await page.goto(qualquerUrl);
   // await page.screenshot({path: 'example.png'});
@@ -34,58 +47,17 @@ async function robo() {
     input.value = senha
   }, process.env.SENHA)
   await page.keyboard.press("Enter")
-  // Serviços
-  // service = await page.waitForXPath('//*[@id="2000"]/a')
-  // service.click();
-  // apontamento
-  // ap = await page.waitForXPath('//*[@id="jt9"]/a[2]')
-  // ap.click();
-  await page.goto(qualquerUrl2);
-  // TIPO DE SERVIÇO
-  // await page.keyboard.press("Tab")
-  // await page.keyboard.type("LINHA VIVA")
-  // await page.keyboard.press("Enter")
-  // // RETORNO DE CAMPO
-  // await page.keyboard.press("Tab")
-  // await page.keyboard.press("Tab")
-  // await page.keyboard.type("242")
-  // // EQUIPE
-  // for (let i = 0; i < 13; i++) {
-  //   await page.keyboard.press('Tab');}
+  // await page.goto(qualquerUrl2);
 
-  // await page.keyboard.type("CND")
-  // await page.keyboard.press("Enter")
+  
+////////////ETAPA 2///////////
 
-  // // ORIGEM DE SERVIÇO
-  // await page.keyboard.press("Tab")
-  // await page.keyboard.type("NOVO SERVIÇO")
-  // await page.keyboard.press("Enter")
-  // // ZONA DE CADASTRO
-  // for (let i = 0; i < 7; i++) {
-  // await page.keyboard.press('Tab');}
-  // await page.keyboard.type("RURAL")
-  // await page.keyboard.press("Enter")
+  async function acessarLink(link) {
+    
+    // Navegar para o link extraído
+    await page.goto(link,  { waitUntil: 'networkidle0' }); // Use networkidle0 para esperar pela inatividade da rede);
 
-  // // Id do cliente
-  // await page.evaluate(()=>{ 
-  //   let input = document.querySelector('#idcliente')
-  //   input.value = "LINHA VIVA"
-  // })
-  // // Data Ex
-  // await page.evaluate(()=>{ 
-  //   let input = document.querySelector('#dat_exec')
-  //   input.value = "08/09/2023"
-  // })
-
-  // // Observação
-  // await page.evaluate(()=>{ 
-  //   let input = document.querySelector('#tx_obs_central')
-  //   input.value = "LINHA VIVA"
-  // })
-
-  await page.goto(qualquerUrl3,  { waitUntil: 'networkidle0' }); // Use networkidle0 para esperar pela inatividade da rede);
-
-
+    // await page.goto(qualquerUrl3,  { waitUntil: 'networkidle0' }); // Use networkidle0 para esperar pela inatividade da rede);
   try {
     // Espera pelo iframe e obtém o frameHandle
     const frameHandle = await page.waitForSelector('iframe[src*="obras_anexos.php?cod=64675"]');
@@ -110,37 +82,17 @@ async function robo() {
     console.error('Erro ao esperar pelo seletor dentro do iframe:', error.message);
   }
 
+    // Fechar o navegador
+    await browser.close();
+}
 
-  // const inputUploadHandle = await page.waitForSelector('input[type="file"]');
-  // const fileToUpload = 'Doc/kml.pdf';
-  // await inputUploadHandle.uploadFile(fileToUpload);
+async function main() {
+    const link = await obterLinkDoExcel();
+    console.log('Acessando link:', link); // Opcional, para debug
+    await acessarLink(link);
+}
 
-  // for (let i = 0; i < 71; i++) {
-  //      await page.keyboard.press('Tab');}
-      //  await page.keyboard.press("Enter")
-       
-
- 
-
-
-
-  
-
-
-
-
-
-
-
- 
-
-    
- 
-
-
-  
-  
-
+main();
   
 }
 
